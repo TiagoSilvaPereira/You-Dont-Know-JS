@@ -186,29 +186,29 @@ O operador `typeof` retorna `"undefined"` até para variáveis "undeclared (não
 
 Similarmente, teria sido ótimo se `typeof` usado com uma variável não declarada retornasse "undeclared" ao invés de confundir o resultado com os diferentes tipos de "undefined".
 
-### `typeof` Undeclared
+### `typeof` Undeclared (Não declarado)
 
-Nevertheless, this safety guard is a useful feature when dealing with JavaScript in the browser, where multiple script files can load variables into the shared global namespace.
+Mesmo assim, esta proteção de segurança é um recurso útil quando se lida com JavaScript no navegador, onde múltiplos arquivos de script podem carregar variáveis no namespace global compartilhado.
 
-**Note:** Many developers believe there should never be any variables in the global namespace, and that everything should be contained in modules and private/separate namespaces. This is great in theory but nearly impossible in practicality; still it's a good goal to strive toward! Fortunately, ES6 added first-class support for modules, which will eventually make that much more practical.
+**Nota:** Muitos desenvolvedores acreditam que nunca devem existir variáveis no namespace global, e que tudo deve estar em módulos e namespaces privados/separados. Isso é ótimo em teoria mas quase impossível na prática; Ainda assim é uma boa meta à se esforçar para alcançar. Felizmente, ES6 adicionou suporte de primeira classe para módulos, que irá eventualmente deixar isso muito mais prático.
 
-As a simple example, imagine having a "debug mode" in your program that is controlled by a global variable (flag) called `DEBUG`. You'd want to check if that variable was declared before performing a debug task like logging a message to the console. A top-level global `var DEBUG = true` declaration would only be included in a "debug.js" file, which you only load into the browser when you're in development/testing, but not in production.
+Como exemplo, imagine ter um "debug mode (modo de depuração)" em seu programa que é controlado por uma variável global (flag) chamada `DEBUG`. Você gostaria de checar se esta variável foi declarada antes de executar uma tarefa de depuração como enviar uma mensagem para o console. Uma declaração global `var DEBUG = true` de alto nível seria incluída em uma arquivo "debug.js", o qual você carregaria no navegador quando estivesse em desenvolvimento/testando, mas não em produção.
 
-However, you have to take care in how you check for the global `DEBUG` variable in the rest of your application code, so that you don't throw a `ReferenceError`. The safety guard on `typeof` is our friend in this case.
+Contudo, você deve tomar cuidado em como fará a checagem da variável global `DEBUG` no resto do código da sua aplicação, de modo que não dispare um `ReferenceError`. A proteção de segurança no `typeof` é sua amiga nesse caso.
 
 ```js
-// oops, this would throw an error!
+// oops, isso irá disparar um erro!
 if (DEBUG) {
 	console.log( "Debugging is starting" );
 }
 
-// this is a safe existence check
+// Essa é uma checagem de existência segura
 if (typeof DEBUG !== "undefined") {
 	console.log( "Debugging is starting" );
 }
 ```
 
-This sort of check is useful even if you're not dealing with user-defined variables (like `DEBUG`). If you are doing a feature check for a built-in API, you may also find it helpful to check without throwing an error:
+Este tipo de checagem é útil mesmo se você não está lidando com variáveis definidas pelo usuário (como `DEBUG`). Se você está fazendo uma checagem de funcionalidade para uma API nativa, você também pode achar útil checar sem disparar um erro:
 
 ```js
 if (typeof atob === "undefined") {
@@ -216,7 +216,7 @@ if (typeof atob === "undefined") {
 }
 ```
 
-**Note:** If you're defining a "polyfill" for a feature if it doesn't already exist, you probably want to avoid using `var` to make the `atob` declaration. If you declare `var atob` inside the `if` statement, this declaration is hoisted (see the *Scope & Closures* title of this series) to the top of the scope, even if the `if` condition doesn't pass (because the global `atob` already exists!). In some browsers and for some special types of global built-in variables (often called "host objects"), this duplicate declaration may throw an error. Omitting the `var` prevents this hoisted declaration.
+**Nota:** Se você está definindo um "polyfill" para uma funcionalidade se ela ainda não existe, você provavelmente vai querer evitar o uso de `var` na declaração de `atob`. Se você declarar `var atob` dentro da declaração de `if`, a declaração será "elevada (hoisted)" (veja o título *Escopo e Cláusuras* desta série) à parte superior do escopo, mesmo que a condição `if` não executar (porque um `atob` global já existe!). Em alguns navegadores e para alguns tipos nativos especiais de varáveis globais (muitas vezes chamados de "host objects"), essa duplicação pode disparar um erro. Omitir o `var` previne essa declaração elevada (hoisted).
 
 Another way of doing these checks against global variables but without the safety guard feature of `typeof` is to observe that all global variables are also properties of the global object, which in the browser is basically the `window` object. So, the above checks could have been done (quite safely) as:
 
